@@ -1,16 +1,14 @@
-
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 // Enable ECB, CTR and CBC mode. Note this can be done before including aes.h or at compile-time.
 // E.g. with GCC by using the -D flag: gcc -c aes.c -DCBC=0 -DCTR=1 -DECB=1
 #define CBC 1
 #define CTR 1
 #define ECB 1
-
 #include "aes.h"
-
 
 static void phex(uint8_t* str);
 static int test_encrypt_cbc(void);
@@ -20,7 +18,6 @@ static int test_decrypt_ctr(void);
 static int test_encrypt_ecb(void);
 static int test_decrypt_ecb(void);
 static void test_encrypt_ecb_verbose(void);
-
 
 int main(void)
 {
@@ -70,32 +67,30 @@ static void test_encrypt_ecb_verbose(void)
 
     uint8_t i;
 
-
     // 128bit key
     uint8_t key[16] =  { (uint8_t) 0x2b, (uint8_t) 0x7e, (uint8_t) 0x15, (uint8_t) 0x16, (uint8_t) 0x28, (uint8_t) 0xae, (uint8_t) 0xd2, (uint8_t) 0xa6, (uint8_t) 0xab, (uint8_t) 0xf7, (uint8_t) 0x15, (uint8_t) 0x88, (uint8_t) 0x09, (uint8_t) 0xcf, (uint8_t) 0x4f, (uint8_t) 0x3c };
-    // 512bit text
 
 
+    // Read binary file from PC
     const char *input_file = "C:\\Users\\emir\\desktop\\BOOT.bin";
-
 
     FILE *file_in = fopen(input_file, "rb");
 
     if (file_in == NULL) {
         perror("Error open file");
-        return 1;
+
     }
 
     fseek(file_in, 0, SEEK_END);
     long file_length = ftell(file_in);
     fseek(file_in, 0, SEEK_SET);
     unsigned char *vrble = (unsigned char *)malloc(file_length);
-    unsigned char *plain_text = (unsigned char *)malloc(file_length);
+    unsigned char *plain_text = (unsigned char *)calloc(file_length, sizeof(unsigned char));
+
     if (vrble == NULL) {
         perror("memmory error");
         fclose(file_in);
         free(vrble);
-        return 1;
     }
 
     size_t read = fread(vrble, 1, file_length, file_in);
@@ -104,58 +99,39 @@ static void test_encrypt_ecb_verbose(void)
         perror("Invalid read file");
         fclose(file_in);
         free(vrble);
-        return 1;
-    }
 
+    }
 
     for (int i = 0; i < file_length; i++) {
          plain_text[i]=vrble[i];
     }
 
-
-
-    printf("\nECB encrypt verbose:\n\n");
-    printf("plain text:\n");
-    for (i = (uint8_t) 0; i < (uint8_t) 4; ++i)
-    {
-        phex(plain_text + i * (uint8_t) 16);
-    }
-    printf("\n");
-
+    // Print the encryption key
     printf("key:\n");
     phex(key);
     printf("\n");
 
-    // print the resulting cipher as 4 x 16 byte strings
-    printf("ciphertext:\n");
-
     struct AES_ctx ctx;
     AES_init_ctx(&ctx, key);
 
-    for (i = 0; i < 4; ++i)
-    {
-      AES_ECB_encrypt(&ctx, plain_text + (i * 16));
-      phex(plain_text + (i * 16));
-
-    }
-
     printf("\n");
 
+    // Create a new file
     FILE*new_file;
     new_file=fopen("C:\\Users\\emir\\desktop\\yeni_dosya.bin","wb+");
 
+    // Data is encrypted and write another file
     for (int i = 0; i < file_length; ++i)
     {
       AES_ECB_encrypt(&ctx, plain_text + (i * 16));
-      size_t write = fwrite(plain_text + (i * 16), 1, file_length, new_file);
+      fwrite(plain_text + (i * 16), 1, 16, new_file);
 
     }
+
     fclose(new_file);
-
-
-
     fclose(file_in);
     free(vrble);
+    free(plain_text);
 
 }
 
@@ -368,12 +344,3 @@ static int test_decrypt_ecb(void)
     }
 
 }
-
-
-
-
-
-
-
-
-
