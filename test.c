@@ -118,7 +118,7 @@ static void test_encrypt_ecb_verbose(void)
 
     // Create a new file
     FILE*new_file;
-    new_file=fopen("C:\\Users\\emir\\desktop\\yeni_dosya.bin","wb+");
+    new_file=fopen("C:\\Users\\emir\\desktop\\new_encrypt.bin","wb+");
 
     // Data is encrypted and write another file
     for (int i = 0; i < file_length; ++i)
