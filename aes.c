@@ -10,29 +10,6 @@ The implementation is verified against the test vectors in:
 ECB-AES128
 ----------
 
-  plain-text:
-    6bc1bee22e409f96e93d7e117393172a
-    ae2d8a571e03ac9c9eb76fac45af8e51
-    30c81c46a35ce411e5fbc1191a0a52ef
-    f69f2445df4f9b17ad2b417be66c3710
-
-  key:
-    2b7e151628aed2a6abf7158809cf4f3c
-
-  resulting cipher
-    3ad77bb40d7a3660a89ecaf32466ef97
-    f5d3d58503b9699de785895a96fdbaaf
-    43b1cd7f598ece23881b00e3ed030688
-    7b0c785e27e8ad3f8223207104725dd4
-
-
-NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
-        You should pad the end of the string with zeros if this is not the case.
-        For AES192/256 the key size is proportionally larger.
-
-*/
-
-
 /*****************************************************************************/
 /* Includes:                                                                 */
 /*****************************************************************************/
@@ -60,7 +37,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 
 // jcallan@github points out that declaring Multiply as a function
 // reduces code size considerably with the Keil ARM compiler.
-// See this link for more information: https://github.com/kokke/tiny-AES-C/pull/3
+
 #ifndef MULTIPLY_AS_A_FUNCTION
   #define MULTIPLY_AS_A_FUNCTION 0
 #endif
@@ -123,16 +100,11 @@ static const uint8_t rsbox[256] = {
 static const uint8_t Rcon[11] = {
   0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
-/*
- * Jordan Goulder points out in PR #12 (https://github.com/kokke/tiny-AES-C/pull/12),
- * that you can remove most of the elements in the Rcon array, because they are unused.
- *
- * From Wikipedia's article on the Rijndael key schedule @ https://en.wikipedia.org/wiki/Rijndael_key_schedule#Rcon
+/* From Wikipedia's article on the Rijndael key schedule @ https://en.wikipedia.org/wiki/Rijndael_key_schedule#Rcon
  *
  * "Only the first some of these constants are actually used – up to rcon[10] for AES-128 (as 11 round keys are needed),
  *  up to rcon[8] for AES-192, up to rcon[7] for AES-256. rcon[0] is not used in AES algorithm."
  */
-
 
 /*****************************************************************************/
 /* Private functions:                                                        */
@@ -319,7 +291,7 @@ static void MixColumns(state_t* state)
 // Multiply is used to multiply numbers in the field GF(2^8)
 // Note: The last call to xtime() is unneeded, but often ends up generating a smaller binary
 //       The compiler seems to be able to vectorize the operation better this way.
-//       See https://github.com/kokke/tiny-AES-c/pull/34
+
 #if MULTIPLY_AS_A_FUNCTION
 static uint8_t Multiply(uint8_t x, uint8_t y)
 {
@@ -485,10 +457,6 @@ void AES_ECB_decrypt(const struct AES_ctx* ctx, uint8_t* buf)
 
 
 #endif // #if defined(ECB) && (ECB == 1)
-
-
-
-
 
 #if defined(CBC) && (CBC == 1)
 
