@@ -36,6 +36,8 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 /*****************************************************************************/
 /* Includes:                                                                 */
 /*****************************************************************************/
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h> // CBC mode, for memset
 #include "aes.h"
 
@@ -146,11 +148,12 @@ static uint8_t getSBoxValue(uint8_t num)
 // This function produces Nb(Nr+1) round keys. The round keys are used in each round to decrypt the states.
 static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
 {
+
   unsigned i, j, k;
   uint8_t tempa[4]; // Used for the column/row operations
 
   // The first round key is the key itself.
-  for (i = 0; i < Nk; ++i)
+  for (i = 0; i < 4; ++i)
   {
     RoundKey[(i * 4) + 0] = Key[(i * 4) + 0];
     RoundKey[(i * 4) + 1] = Key[(i * 4) + 1];
